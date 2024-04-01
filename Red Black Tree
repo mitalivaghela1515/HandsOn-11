@@ -1,0 +1,208 @@
+class Node:
+def __init__(self, data, color="RED"):
+self.data = data
+self.color = color
+self.left = None
+self.right = None
+self.parent = None
+class RedBlackTree:
+def __init__(self):
+self.nil = Node(None, "BLACK") # Sentinel node
+self.root = self.nil
+def insert(self, data):
+new_node = Node(data)
+parent = None
+current = self.root
+while current != self.nil:
+parent = current
+if new_node.data < current.data:
+current = current.left
+else:
+current = current.right
+new_node.parent = parent
+if parent is None:
+self.root = new_node
+elif new_node.data < parent.data:
+parent.left = new_node
+else:
+parent.right = new_node
+new_node.left = self.nil
+new_node.right = self.nil
+new_node.color = "RED"
+self._insert_fixup(new_node)
+def _insert_fixup(self, node):
+while node.parent.color == "RED":
+if node.parent == node.parent.parent.left:
+uncle = node.parent.parent.right
+if uncle.color == "RED":
+node.parent.color = "BLACK"
+uncle.color = "BLACK"
+node.parent.parent.color = "RED"
+node = node.parent.parent
+else:
+if node == node.parent.right:
+node = node.parent
+self._left_rotate(node)
+node.parent.color = "BLACK"
+node.parent.parent.color = "RED"
+self._right_rotate(node.parent.parent)
+else:
+uncle = node.parent.parent.left
+if uncle.color == "RED":
+node.parent.color = "BLACK"
+uncle.color = "BLACK"
+node.parent.parent.color = "RED"
+node = node.parent.parent
+else:
+if node == node.parent.left:
+node = node.parent
+self._right_rotate(node)
+node.parent.color = "BLACK"
+node.parent.parent.color = "RED"
+self._left_rotate(node.parent.parent)
+self.root.color = "BLACK"
+def _left_rotate(self, x):
+y = x.right
+x.right = y.left
+if y.left != self.nil:
+y.left.parent = x
+y.parent = x.parent
+if x.parent == self.nil:
+self.root = y
+elif x == x.parent.left:
+x.parent.left = y
+else:
+x.parent.right = y
+y.left = x
+x.parent = y
+def _right_rotate(self, y):
+x = y.left
+y.left = x.right
+if x.right != self.nil:
+x.right.parent = y
+x.parent = y.parent
+if y.parent == self.nil:
+self.root = x
+elif y == y.parent.right:
+y.parent.right = x
+else:
+y.parent.left = x
+x.right = y
+y.parent = x
+def search(self, data):
+current = self.root
+while current != self.nil and current.data != data:
+if data < current.data:
+current = current.left
+else:
+current = current.right
+return current
+def transplant(self, u, v):
+if u.parent == self.nil:
+self.root = v
+elif u == u.parent.left:
+u.parent.left = v
+else:
+u.parent.right = v
+v.parent = u.parent
+def delete(self, data):
+node = self.search(data)
+if node == self.nil:
+return
+original_color = node.color
+if node.left == self.nil:
+x = node.right
+self.transplant(node, node.right)
+elif node.right == self.nil:
+x = node.left
+self.transplant(node, node.left)
+else:
+y = self.minimum(node.right)
+original_color = y.color
+x = y.right
+if y.parent == node:
+x.parent = y
+else:
+self.transplant(y, y.right)
+y.right = node.right
+y.right.parent = y
+self.transplant(node, y)
+y.left = node.left
+y.left.parent = y
+y.color = node.color
+if original_color == "BLACK":
+self._delete_fixup(x)
+def _delete_fixup(self, x):
+while x != self.root and x.color == "BLACK":
+if x == x.parent.left:
+w = x.parent.right
+if w.color == "RED":
+w.color = "BLACK"
+x.parent.color = "RED"
+self._left_rotate(x.parent)
+w = x.parent.right
+if w.left.color == "BLACK" and w.right.color == "BLACK":
+w.color = "RED"
+x = x.parent
+else:
+if w.right.color == "BLACK":
+w.left.color = "BLACK"
+w.color = "RED"
+self._right_rotate(w)
+w = x.parent.right
+w.color = x.parent.color
+x.parent.color = "BLACK"
+w.right.color = "BLACK"
+self._left_rotate(x.parent)
+x = self.root
+else:
+w = x.parent.left
+if w.color == "RED":
+w.color = "BLACK"
+x.parent.color = "RED"
+self._right_rotate(x.parent)
+w = x.parent.left
+if w.right.color == "BLACK" and w.left.color == "BLACK":
+w.color = "RED"
+x = x.parent
+else:
+if w.left.color == "BLACK":
+w.right.color = "BLACK"
+w.color = "RED"
+self._left_rotate(w)
+w = x.parent.left
+w.color = x.parent.color
+x.parent.color = "BLACK"
+w.left.color = "BLACK"
+self._right_rotate(x.parent)
+x = self.root
+x.color = "BLACK"
+def minimum(self, node):
+while node.left != self.nil:
+node = node.left
+return node
+def inorder_traversal(self, node):
+if node != self.nil:
+self.inorder_traversal(node.left)
+print(node.data, end=" ")
+self.inorder_traversal(node.right)
+# Testing the Red-Black Tree
+if __name__ == "__main__":
+rb_tree = RedBlackTree()
+print("Inserting elements: 10, 20, 30, 15, 25, 5")
+rb_tree.insert(10)
+rb_tree.insert(20)
+rb_tree.insert(30)
+rb_tree.insert(15)
+rb_tree.insert(25)
+rb_tree.insert(5)
+print("Inorder Traversal:")
+rb_tree.inorder_traversal(rb_tree.root)
+print("\n")
+print("Deleting element 20")
+rb_tree.delete(20)
+print("Inorder Traversal after deletion:")
+rb_tree.inorder_traversal(rb_tree.root)
+print("\n")
+print("Searching for element 25:", rb_tree.search(25).data)
+print("Searching for element 20 (after deletion):", rb_tree.search(20))
